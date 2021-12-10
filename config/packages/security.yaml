@@ -1,0 +1,72 @@
+security:
+  password_hashers:
+    App\Entity\User:
+      algorithm: "auto"
+
+  # https://symfony.com/doc/current/security/experimental_authenticators.html
+  #enable_authenticator_manager: true
+  # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+  providers:
+    # used to reload user from session & other features (e.g. switch_user)
+    app_user_provider:
+      entity:
+        class: App\Entity\User
+        property: username
+  firewalls:
+    dev:
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+    registration:
+      pattern: ^/api/users
+      stateless: true
+      anonymous: true
+      methods: [POST]
+    verifyCode:
+      pattern: ^/api/verify-code-client
+      stateless: true
+      anonymous: true
+      methods: [POST]
+    getproduit:
+      pattern: ^/api/catalogues
+      stateless: true
+      anonymous: true
+      methods: [GET]
+      
+    login:
+      pattern: ^/api/login
+      stateless: true
+      anonymous: true
+      json_login:
+        check_path: /api/login
+        username_path: username
+        password_path: password
+        success_handler: lexik_jwt_authentication.handler.authentication_success
+        failure_handler: lexik_jwt_authentication.handler.authentication_failure
+    api:
+      pattern: ^/api/
+      stateless: true
+      guard:
+        authenticators:
+          - lexik_jwt_authentication.jwt_token_authenticator
+
+    main:
+      anonymous: true
+      lazy: true
+      provider: app_user_provider
+      # activate different ways to authenticate
+      # https://symfony.com/doc/current/security.html#firewalls-authentication
+
+      # https://symfony.com/doc/current/security/impersonating_user.html
+      # switch_user: true
+
+  # Easy way to control access for large sections of your site
+  # Note: Only the *first* access control that matches will be used
+  access_control:
+    - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    #- { path: ^/api/verify-code-client, roles: IS_AUTHENTICATED_FULLY, methods: [GET,PUT,DELETE,PATCH] }
+    #- { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+    #- { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    #- { path: ^/api/produits, roles: IS_AUTHENTICATED_FULLY, methods: [POST,PUT,DELETE,PATCH] }
+    #- { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+    #- { path: ^/api$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
