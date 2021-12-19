@@ -22,7 +22,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * itemOperations={
  *      "get"={"method"="GET", "access_control"="is_granted('IS_AUTHENTICATED_FULLY') === false"},
  *      "put"={"access_control"="is_granted('ROLE_ADMIN')"},
- *      "delete"={"access_control"="is_granted('ROLE_ADMIN')"}
+ *      "delete"={"access_control"="is_granted('ROLE_ADMIN')"},
+  *      "getItemid"={"method"="GET","access_control"="is_granted('IS_AUTHENTICATED_FULLY') === false", "path"="/catalogues/{id}/produits", "normalization_context"={"groups"={"normgrp_red"}}}
  * },
  * )
  */
@@ -33,6 +34,7 @@ class Catalogue
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups({"catalogue:read", "prduit:read"})
+     * @Groups({"normgrp_red"})
      */
     private $id;
 
@@ -51,6 +53,7 @@ class Catalogue
     /**
      * @ORM\OneToMany(targetEntity=Produit::class, mappedBy="catalogue", cascade={"persist"})
      * @Groups({"catalogue:read", "catalogue:write"})
+     * @Groups({"normgrp_red"})
      */
     private $produits;
 

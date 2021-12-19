@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * normalizationContext={"groups"={"prduit:read"}},
  * denormalizationContext={"groups"={"prduit:write"}},
  * collectionOperations={
- *      "get"={"method"="GET", "access_control"="is_granted('IS_AUTHENTICATED_FULLY') === false"},
+ *      "get"={"method"="GET"},
  *      "post"={"access_control"="is_granted('ROLE_ADMIN')"}
  * },
  * itemOperations={
@@ -33,18 +33,21 @@ class Produit
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups({"commenteire:read", "catalogue:read", "prduit:read"})
+     * @Groups({"normgrp_red"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:write", "prduit:read"})
+     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write"})
+     * @Groups({"normgrp_red"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="float")
-     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:write", "prduit:read"})
+     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write"})
+     * @Groups({"normgrp_red"})
      */
     private $prix;
 

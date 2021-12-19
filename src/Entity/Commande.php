@@ -18,12 +18,6 @@ class Commande
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $user;
-
-    /**
      * @ORM\Column(type="date")
      */
     private $date;
@@ -42,6 +36,12 @@ class Commande
      * @ORM\Column(type="date")
      */
     private $dataLivraison;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=EtatCommande::class)
