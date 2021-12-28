@@ -1,12 +1,24 @@
 <?php
 
 namespace App\Entity;
-
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CommandeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=CommandeRepository::class)
+ * @ApiResource(
+ *     routePrefix="/api",
+ *     collectionOperations={
+ *          "get"={
+ *              "method"="POST",
+ *              "path"="/api/commande/recapitulatif"
+ * }
+ * }
+ * )
  */
 class Commande
 {
@@ -18,6 +30,7 @@ class Commande
     private $id;
 
     /**
+     * 
      * @ORM\Column(type="date")
      */
     private $date;
@@ -48,6 +61,16 @@ class Commande
      * @ORM\JoinColumn(nullable=false)
      */
     private $etat;
+
+    /**
+     * @ORM\OneToMany(targetEntity=DetailCommande::class, mappedBy="commande")
+     */
+    private $detail;
+
+    public function __construct()
+    {
+        $this->detail = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -80,8 +103,11 @@ class Commande
 
     public function getPrixTotal(): ?float
     {
-        return $this->prixTotal;
-    }
+        $prixTotal = null;
+        foreach ($this->getDetail()->getValues() as $produit) {
+            $prixTotal = $prixTotal + ($producit->getPrice() * $produit->getQuantite());
+        }
+        return  $total;    }
 
     public function setPrixTotal(float $prixTotal): self
     {
@@ -122,6 +148,36 @@ class Commande
     public function setEtat(?EtatCommande $etat): self
     {
         $this->etat = $etat;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|DetailCommande[]
+     */
+    public function getDetail(): Collection
+    {
+        return $this->detail;
+    }
+
+    public function addDetail(DetailCommande $detail): self
+    {
+        if (!$this->detail->contains($detail)) {
+            $this->detail[] = $detail;
+            $detail->setCommande($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetail(DetailCommande $detail): self
+    {
+        if ($this->detail->removeElement($detail)) {
+            // set the owning side to null (unless already changed)
+            if ($detail->getCommande() === $this) {
+                $detail->setCommande(null);
+            }
+        }
 
         return $this;
     }

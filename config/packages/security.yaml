@@ -27,11 +27,15 @@ security:
       anonymous: true
       methods: [POST]
     getproduit:
+      pattern: ^/api/produits
+      stateless: true
+      anonymous: true
+      methods: [GET]
+    getcatalogue:
       pattern: ^/api/catalogues
       stateless: true
       anonymous: true
       methods: [GET]
-      
     login:
       pattern: ^/api/login
       stateless: true

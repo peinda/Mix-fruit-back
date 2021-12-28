@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * normalizationContext={"groups"={"prduit:read"}},
  * denormalizationContext={"groups"={"prduit:write"}},
  * collectionOperations={
- *      "get"={"method"="GET"},
+ *      "get"={"method"="GET", "access_control"="is_granted('IS_AUTHENTICATED_FULLY') === false"},
  *      "post"={"access_control"="is_granted('ROLE_ADMIN')"}
  * },
  * itemOperations={
@@ -33,21 +33,18 @@ class Produit
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups({"commenteire:read", "catalogue:read", "prduit:read"})
-     * @Groups({"normgrp_red"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write"})
-     * @Groups({"normgrp_red"})
+     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:read"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="float")
-     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write"})
-     * @Groups({"normgrp_red"})
+     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:read"})
      */
     private $prix;
 
@@ -82,10 +79,16 @@ class Produit
      */
     private $photos;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=DetailCommande::class, mappedBy="produit")
+     */
+    private $detailCommandes;
+
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
         $this->photos = new ArrayCollection();
+        $this->detailCommandes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -208,6 +211,33 @@ class Produit
             if ($photo->getProduit() === $this) {
                 $photo->setProduit(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|DetailCommande[]
+     */
+    public function getDetailCommandes(): Collection
+    {
+        return $this->detailCommandes;
+    }
+
+    public function addDetailCommande(DetailCommande $detailCommande): self
+    {
+        if (!$this->detailCommandes->contains($detailCommande)) {
+            $this->detailCommandes[] = $detailCommande;
+            $detailCommande->addProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetailCommande(DetailCommande $detailCommande): self
+    {
+        if ($this->detailCommandes->removeElement($detailCommande)) {
+            $detailCommande->removeProduit($this);
         }
 
         return $this;
