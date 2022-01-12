@@ -16,7 +16,6 @@ class PanierController extends AbstractController
     public function add($id, PanierService $panierSer)
     {
         $panierSer->add($id);
-
     }
 
     /**
@@ -24,16 +23,14 @@ class PanierController extends AbstractController
      */
     public function remove($id, PanierService $panierSer)
     {
-         $panierSer->remove($id);       
-
+        $panierSer->remove($id);
     }
-/**
+    /**
      * @Route("/mon-panier/supprimer/{id}", name="cart_remove_by_id")
      */
     public function delete(PanierService $panierSer, $id)
     {
         $panierSer->delete($id);
-
     }
 
 
@@ -42,7 +39,6 @@ class PanierController extends AbstractController
      */
     public function decrease(PanierService $panierSer, $id)
     {
-        $panierSer->decrease($id);
-
+         $panierSer->decrease($id);
     }
 }

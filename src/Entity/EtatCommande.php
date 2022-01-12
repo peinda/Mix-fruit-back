@@ -2,11 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\EtatCommandeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\EtatCommandeRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
 
 /**
  * @ORM\Entity(repositoryClass=EtatCommandeRepository::class)
+ * @ApiResource(
+ * )
  */
 class EtatCommande
 {

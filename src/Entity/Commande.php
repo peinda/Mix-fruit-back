@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Entity;
+
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CommandeRepository;
@@ -11,12 +12,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=CommandeRepository::class)
  * @ApiResource(
- *     routePrefix="/api",
+ *      attributes={"denormalization_context"={"groups"={"comm_write"}}
+ *           },
  *     collectionOperations={
- *          "get"={
+ *            "comm"={
  *              "method"="POST",
- *              "path"="/api/commande/recapitulatif"
- * }
+ *              "path"="/commande",
+ *     },
  * }
  * )
  */
@@ -28,12 +30,6 @@ class Commande
      * @ORM\Column(type="integer")
      */
     private $id;
-
-    /**
-     * 
-     * @ORM\Column(type="date")
-     */
-    private $date;
 
     /**
      * @ORM\Column(type="float")
@@ -63,13 +59,24 @@ class Commande
     private $etat;
 
     /**
-     * @ORM\OneToMany(targetEntity=DetailCommande::class, mappedBy="commande")
+     * @ORM\Column(type="float")
      */
-    private $detail;
+    private $Montant;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $quantitéPrduit;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Produit::class, mappedBy="commande")
+     */
+    private $produits;
 
     public function __construct()
     {
         $this->detail = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -89,25 +96,10 @@ class Commande
         return $this;
     }
 
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
-
-    public function setDate(\DateTimeInterface $date): self
-    {
-        $this->date = $date;
-
-        return $this;
-    }
-
     public function getPrixTotal(): ?float
     {
-        $prixTotal = null;
-        foreach ($this->getDetail()->getValues() as $produit) {
-            $prixTotal = $prixTotal + ($producit->getPrice() * $produit->getQuantite());
-        }
-        return  $total;    }
+        return $this->getPrixTotal;
+    }
 
     public function setPrixTotal(float $prixTotal): self
     {
@@ -152,30 +144,54 @@ class Commande
         return $this;
     }
 
-    /**
-     * @return Collection|DetailCommande[]
-     */
-    public function getDetail(): Collection
+    public function getMontant(): ?float
     {
-        return $this->detail;
+        return $this->Montant;
     }
 
-    public function addDetail(DetailCommande $detail): self
+    public function setMontant(float $Montant): self
     {
-        if (!$this->detail->contains($detail)) {
-            $this->detail[] = $detail;
-            $detail->setCommande($this);
+        $this->Montant = $Montant;
+
+        return $this;
+    }
+
+    public function getQuantitéPrduit(): ?string
+    {
+        return $this->quantitéPrduit;
+    }
+
+    public function setQuantitéPrduit(string $quantitéPrduit): self
+    {
+        $this->quantitéPrduit = $quantitéPrduit;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Produit[]
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
+    }
+
+    public function addProduit(Produit $produit): self
+    {
+        if (!$this->produits->contains($produit)) {
+            $this->produits[] = $produit;
+            $produit->setCommande($this);
         }
 
         return $this;
     }
 
-    public function removeDetail(DetailCommande $detail): self
+    public function removeProduit(Produit $produit): self
     {
-        if ($this->detail->removeElement($detail)) {
+        if ($this->produits->removeElement($produit)) {
             // set the owning side to null (unless already changed)
-            if ($detail->getCommande() === $this) {
-                $detail->setCommande(null);
+            if ($produit->getCommande() === $this) {
+                $produit->setCommande(null);
             }
         }
 

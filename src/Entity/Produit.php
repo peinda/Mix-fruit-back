@@ -80,9 +80,9 @@ class Produit
     private $photos;
 
     /**
-     * @ORM\ManyToMany(targetEntity=DetailCommande::class, mappedBy="produit")
+     * @ORM\ManyToOne(targetEntity=Commande::class, inversedBy="produits")
      */
-    private $detailCommandes;
+    private $commande;
 
     public function __construct()
     {
@@ -216,30 +216,16 @@ class Produit
         return $this;
     }
 
-    /**
-     * @return Collection|DetailCommande[]
-     */
-    public function getDetailCommandes(): Collection
+    public function getCommande(): ?Commande
     {
-        return $this->detailCommandes;
+        return $this->commande;
     }
 
-    public function addDetailCommande(DetailCommande $detailCommande): self
+    public function setCommande(?Commande $commande): self
     {
-        if (!$this->detailCommandes->contains($detailCommande)) {
-            $this->detailCommandes[] = $detailCommande;
-            $detailCommande->addProduit($this);
-        }
+        $this->commande = $commande;
 
         return $this;
     }
 
-    public function removeDetailCommande(DetailCommande $detailCommande): self
-    {
-        if ($this->detailCommandes->removeElement($detailCommande)) {
-            $detailCommande->removeProduit($this);
-        }
-
-        return $this;
-    }
 }

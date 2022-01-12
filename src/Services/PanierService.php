@@ -109,6 +109,4 @@ class PanierService
         }
         return $Prixtotal;
     }
-
-
 }

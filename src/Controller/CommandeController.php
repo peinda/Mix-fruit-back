@@ -2,14 +2,18 @@
 
 namespace App\Controller;
 
-use App\Classe\PanierService;
-use App\Entity\Commande;
 use App\Entity\Produit;
-use App\Entity\DetailCommande;
+use App\Entity\Commande;
+use App\Classe\PanierService;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CommandeController extends AbstractController
 {
@@ -20,36 +24,44 @@ class CommandeController extends AbstractController
     {
         $this->em = $em;
     }
-    
 
     /**
-     * @Route("/commande/recapitulatif", name="order_recap", methods={"POST"})
+     * @Route
+     *(path="/commande", name="commande", methods={"POST"},
+     * defaults={
+     *     "_controller"="\app\Controller\CommandeController::commander",
+     *     "_api_resource_class"=Commande::class,
+     *     "_api_collection_operation_name"="commande",
+     *    }
+     * )
      */
-    public function recap(PanierService $panierSer, Request $request): Response
+    public function commander(Request $request,SerializerInterface $serializer, EntityManagerInterface $entityManager,
+                                     ValidatorInterface $validator, UserRepository $userRepository, PanierService $panierService, Security $security)
     {
-          $date = new \DateTime();
 
-            $commande = new Commande();
-            $reference = $date->format('dmY') . '-' . uniqid();
-            $commande->setUser($this->getUser());
-            $commande->setDataLivraison($date);
-            $commande->setPrixTotal($prixTotal->getPrixTotal());
+        $commandeJson= $request->getContent();
+        dd($request->getContent());
+         $commandeTab= $serializer->decode($commandeJson, 'json');
+         $commande = new Commande();
+         $user= $security->getUser();
+         //dd($user);
+         $idUserCom= $user->getId();
+         $idUserCom= $userRepository->find($idUserCom);
+         $commande->setDateLivraison(new \DateTime());
+         $commande->setAdresse($adresse);
 
-            $this->em->persist($commande);
+         $prixTotal=$panierService->getTotal()($prixTotal);
+         $commande->setPrixTotal($prixTotal);
+         
+         $commande->setQuantitéPrduit($quantitéPrduit);
+         $commande->setMontant($montant);
+         $produit=$panierService->getFullCart($produit);
+         $commande->setProduits($produit);
 
-            foreach ($panierSer->getFullCart() as $produit) {
-                $commandeDetails = new DetailCommande();
-                $commandeDetails->setCommande($commande);
-                $commandeDetails->setProduit($produit['produit']->getNom());
-                $commandeDetails->setQuantite($produit['quantite']);
-                $commandeDetails->setPrixUnité($produit['produit']->getPrixTotal());
-                $commandeDetails->setPrixTotal($produit['produit']->getPrixUnité() * $produit['quantite']);
-                $this->em->persist($commandeDetails);
-            }
+            $entityManager= $this->getDoctrine()->getManager();
+            $entityManager->persist( $commandeJson);
+            $entityManager->flush();
+            return $this->json($commande, Response::HTTP_OK);
+        }
 
-
-            $this->em->flush();
-           
-    }
 }
-
