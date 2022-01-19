@@ -80,16 +80,19 @@ class Produit
     private $photos;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Commande::class, inversedBy="produits")
+     * @ORM\OneToMany(targetEntity=DetailsCommande::class, mappedBy="produit")
      */
-    private $commande;
+    private $detailsCommande;
+
+ 
+
 
     public function __construct()
     {
-        $this->commentaires = new ArrayCollection();
-        $this->photos = new ArrayCollection();
-        $this->detailCommandes = new ArrayCollection();
+        $this->detailsCommandes = new ArrayCollection();
+        $this->detailsCommande = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
@@ -216,16 +219,36 @@ class Produit
         return $this;
     }
 
-    public function getCommande(): ?Commande
+    /**
+     * @return Collection|DetailsCommande[]
+     */
+    public function getDetailsCommande(): Collection
     {
-        return $this->commande;
+        return $this->detailsCommande;
     }
 
-    public function setCommande(?Commande $commande): self
+    public function addDetailsCommande(DetailsCommande $detailsCommande): self
     {
-        $this->commande = $commande;
+        if (!$this->detailsCommande->contains($detailsCommande)) {
+            $this->detailsCommande[] = $detailsCommande;
+            $detailsCommande->setProduit($this);
+        }
 
         return $this;
     }
 
+    public function removeDetailsCommande(DetailsCommande $detailsCommande): self
+    {
+        if ($this->detailsCommande->removeElement($detailsCommande)) {
+            // set the owning side to null (unless already changed)
+            if ($detailsCommande->getProduit() === $this) {
+                $detailsCommande->setProduit(null);
+            }
+        }
+
+        return $this;
+    }
+
+   
+   
 }

@@ -15,9 +15,14 @@ use Doctrine\ORM\Mapping as ORM;
  *      attributes={"denormalization_context"={"groups"={"comm_write"}}
  *           },
  *     collectionOperations={
- *            "comm"={
+ *          "Comm"={
  *              "method"="POST",
- *              "path"="/commande",
+ *              "path"="/commandes",
+ *              "denormalization_context"={"groups"={"command_write"}}
+ * } ,
+ *              "getComm"={
+ *              "method"="GET",
+ *              "path"="/commandes",
  *     },
  * }
  * )
@@ -40,12 +45,7 @@ class Commande
      * @ORM\Column(type="string", length=255)
      */
     private $adresse;
-
-    /**
-     * @ORM\Column(type="date")
-     */
-    private $dataLivraison;
-
+    
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false)
@@ -53,31 +53,34 @@ class Commande
     private $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity=EtatCommande::class)
+     * @ORM\ManyToOne(targetEntity=EtatCommande::class, cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $etat;
 
+
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="date")
      */
-    private $Montant;
+    private $date;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $quantitéPrduit;
+    private $num_commande;
 
     /**
-     * @ORM\OneToMany(targetEntity=Produit::class, mappedBy="commande")
+     * @ORM\OneToMany(targetEntity=DetailsCommande::class, mappedBy="commande")
      */
-    private $produits;
+    private $details;
 
     public function __construct()
     {
-        $this->detail = new ArrayCollection();
-        $this->produits = new ArrayCollection();
+        $this->details = new ArrayCollection();
     }
+
+  
+
 
     public function getId(): ?int
     {
@@ -98,7 +101,7 @@ class Commande
 
     public function getPrixTotal(): ?float
     {
-        return $this->getPrixTotal;
+        return $this->prixTotal;
     }
 
     public function setPrixTotal(float $prixTotal): self
@@ -120,18 +123,6 @@ class Commande
         return $this;
     }
 
-    public function getDataLivraison(): ?\DateTimeInterface
-    {
-        return $this->dataLivraison;
-    }
-
-    public function setDataLivraison(\DateTimeInterface $dataLivraison): self
-    {
-        $this->dataLivraison = $dataLivraison;
-
-        return $this;
-    }
-
     public function getEtat(): ?EtatCommande
     {
         return $this->etat;
@@ -144,57 +135,60 @@ class Commande
         return $this;
     }
 
-    public function getMontant(): ?float
+
+    public function getDate(): ?\DateTimeInterface
     {
-        return $this->Montant;
+        return $this->date;
     }
 
-    public function setMontant(float $Montant): self
+    public function setDate(\DateTimeInterface $date): self
     {
-        $this->Montant = $Montant;
+        $this->date = $date;
 
         return $this;
     }
 
-    public function getQuantitéPrduit(): ?string
+    public function getNumCommande(): ?string
     {
-        return $this->quantitéPrduit;
+        return $this->num_commande;
     }
 
-    public function setQuantitéPrduit(string $quantitéPrduit): self
+    public function setNumCommande(string $num_commande): self
     {
-        $this->quantitéPrduit = $quantitéPrduit;
+        $this->num_commande = $num_commande;
 
         return $this;
     }
 
     /**
-     * @return Collection|Produit[]
+     * @return Collection|DetailsCommande[]
      */
-    public function getProduits(): Collection
+    public function getDetails(): Collection
     {
-        return $this->produits;
+        return $this->details;
     }
 
-    public function addProduit(Produit $produit): self
+    public function addDetail(DetailsCommande $detail): self
     {
-        if (!$this->produits->contains($produit)) {
-            $this->produits[] = $produit;
-            $produit->setCommande($this);
+        if (!$this->details->contains($detail)) {
+            $this->details[] = $detail;
+            $detail->setCommande($this);
         }
 
         return $this;
     }
 
-    public function removeProduit(Produit $produit): self
+    public function removeDetail(DetailsCommande $detail): self
     {
-        if ($this->produits->removeElement($produit)) {
+        if ($this->details->removeElement($detail)) {
             // set the owning side to null (unless already changed)
-            if ($produit->getCommande() === $this) {
-                $produit->setCommande(null);
+            if ($detail->getCommande() === $this) {
+                $detail->setCommande(null);
             }
         }
 
         return $this;
     }
+
+   
 }

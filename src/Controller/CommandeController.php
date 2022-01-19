@@ -4,9 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Produit;
 use App\Entity\Commande;
-use App\Classe\PanierService;
+use App\Entity\EtatCommande;
+use App\Entity\DetailsCommande;
 use App\Repository\UserRepository;
+use App\Repository\ProduitRepository;
+use App\Repository\CommandeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\DetailsCommandeRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,45 +27,62 @@ class CommandeController extends AbstractController
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
-    }
-
+    }  
+    
     /**
-     * @Route
-     *(path="/commande", name="commande", methods={"POST"},
-     * defaults={
-     *     "_controller"="\app\Controller\CommandeController::commander",
-     *     "_api_resource_class"=Commande::class,
-     *     "_api_collection_operation_name"="commande",
-     *    }
-     * )
+     * @Route("/api/commande", name="commande", methods={"POST"})
      */
-    public function commander(Request $request,SerializerInterface $serializer, EntityManagerInterface $entityManager,
-                                     ValidatorInterface $validator, UserRepository $userRepository, PanierService $panierService, Security $security)
+    public function commander(Request $request,SerializerInterface $serializer, EntityManagerInterface $em,
+                                     ValidatorInterface $validator, UserRepository $userRepository, ProduitRepository $produitRepo, CommandeRepository $comRepo ,Security $security)
     {
 
-        $commandeJson= $request->getContent();
-        dd($request->getContent());
-         $commandeTab= $serializer->decode($commandeJson, 'json');
-         $commande = new Commande();
-         $user= $security->getUser();
-         //dd($user);
-         $idUserCom= $user->getId();
-         $idUserCom= $userRepository->find($idUserCom);
-         $commande->setDateLivraison(new \DateTime());
-         $commande->setAdresse($adresse);
+                $commandeJson= $request->getContent();
+                //dd($request->getContent());
+                $commandeTab= $serializer->decode($commandeJson, 'json')["produits"];
+                //dd($commandeTab);
+                $commande = new Commande();
+                $prixTotal = 0;
+                // dd($commande);
+                $user= $security->getUser();
+                //dd($user);
+                $commande-> setUser($user);
+                $commande-> setAdresse($user->getAdress());
+                $commande->setDate(new \DateTime());
+                // $commande->setAdresse($commandeTab['adresse']);
+          
+            foreach($commandeTab as $produitItem){
+                $produit=$produitRepo->find($produitItem["id"]);
+                $detailsCommande = new DetailsCommande();
+                $detailsCommande-> setMontant($produit->getPrix());
+                $detailsCommande->setQuantiteProduit($produitItem["qtite"]);
+                $detailsCommande->setTotal($produit->getPrix()*$produitItem["qtite"]);
+                $detailsCommande->setCommande($commande);
+                $detailsCommande->setProduit($produit);
+                $prixTotal += $detailsCommande->getTotal();
+               }
+               
+                //dd($prixTotal);
+                $commande->setPrixTotal($prixTotal);
 
-         $prixTotal=$panierService->getTotal()($prixTotal);
-         $commande->setPrixTotal($prixTotal);
-         
-         $commande->setQuantitéPrduit($quantitéPrduit);
-         $commande->setMontant($montant);
-         $produit=$panierService->getFullCart($produit);
-         $commande->setProduits($produit);
+                $etat = new EtatCommande();
+                $etat->setLibelle("En_Cours");
+                $commande->setEtat($etat);
+                
+                //dd($commande);
+                $dataCom=$comRepo->findAll();
+                $lastCom = $dataCom[count($dataCom)-1]->getNumCommande();
+                $numActu = (substr($lastCom, -1)+1);
+                $lastCom[strlen($lastCom)-1]= $numActu;
+                $commande->setNumCommande($lastCom) ;               
+                
+                $em->persist($detailsCommande);
+                //dd($detailsCommande);
+                $em->persist($commande);
+                //dd($commande);
 
-            $entityManager= $this->getDoctrine()->getManager();
-            $entityManager->persist( $commandeJson);
-            $entityManager->flush();
-            return $this->json($commande, Response::HTTP_OK);
-        }
-
+                $em= $this->getDoctrine()->getManager();
+                $em->flush();
+                return $this->json($commande, Response::HTTP_OK);
+            }
 }
+
