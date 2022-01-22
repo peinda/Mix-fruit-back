@@ -84,9 +84,6 @@ class Produit
      */
     private $detailsCommande;
 
- 
-
-
     public function __construct()
     {
         $this->detailsCommandes = new ArrayCollection();

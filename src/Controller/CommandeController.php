@@ -33,22 +33,17 @@ class CommandeController extends AbstractController
      * @Route("/api/commande", name="commande", methods={"POST"})
      */
     public function commander(Request $request,SerializerInterface $serializer, EntityManagerInterface $em,
-                                     ValidatorInterface $validator, UserRepository $userRepository, ProduitRepository $produitRepo, CommandeRepository $comRepo ,Security $security)
+                        ValidatorInterface $validator, UserRepository $userRepository,
+                    ProduitRepository $produitRepo, CommandeRepository $comRepo ,Security $security)
     {
-
                 $commandeJson= $request->getContent();
-                //dd($request->getContent());
                 $commandeTab= $serializer->decode($commandeJson, 'json')["produits"];
-                //dd($commandeTab);
                 $commande = new Commande();
                 $prixTotal = 0;
-                // dd($commande);
                 $user= $security->getUser();
-                //dd($user);
                 $commande-> setUser($user);
                 $commande-> setAdresse($user->getAdress());
                 $commande->setDate(new \DateTime());
-                // $commande->setAdresse($commandeTab['adresse']);
           
             foreach($commandeTab as $produitItem){
                 $produit=$produitRepo->find($produitItem["id"]);
@@ -60,29 +55,30 @@ class CommandeController extends AbstractController
                 $detailsCommande->setProduit($produit);
                 $prixTotal += $detailsCommande->getTotal();
                }
-               
-                //dd($prixTotal);
                 $commande->setPrixTotal($prixTotal);
 
                 $etat = new EtatCommande();
                 $etat->setLibelle("En_Cours");
                 $commande->setEtat($etat);
-                
-                //dd($commande);
+                    
                 $dataCom=$comRepo->findAll();
-                $lastCom = $dataCom[count($dataCom)-1]->getNumCommande();
-                $numActu = (substr($lastCom, -1)+1);
-                $lastCom[strlen($lastCom)-1]= $numActu;
-                $commande->setNumCommande($lastCom) ;               
-                
+                if($dataCom){
+                    $lastCom = $dataCom[count($dataCom)-1]->getNumCommande();
+                    $numActu = (substr($lastCom, -1)+1);
+                    $lastCom[strlen($lastCom)-1]= $numActu;
+                }
+                else{
+                    $lastCom = "N000001";
+                }
+                $commande->setNumCommande($lastCom) ;          
                 $em->persist($detailsCommande);
-                //dd($detailsCommande);
                 $em->persist($commande);
-                //dd($commande);
-
                 $em= $this->getDoctrine()->getManager();
                 $em->flush();
                 return $this->json($commande, Response::HTTP_OK);
             }
+     /**
+     * @Route("/api/commande", name="commande", methods={"GET"})
+     */
 }
 

@@ -2,12 +2,15 @@
 
 namespace App\Entity;
 
-use Symfony\Component\Serializer\Annotation\Groups;
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\CommandeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CommandeRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints\Uuid;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
  * @ORM\Entity(repositoryClass=CommandeRepository::class)
@@ -17,12 +20,12 @@ use Doctrine\ORM\Mapping as ORM;
  *     collectionOperations={
  *          "Comm"={
  *              "method"="POST",
- *              "path"="/commandes",
+ *              "path"="/commande",
  *              "denormalization_context"={"groups"={"command_write"}}
  * } ,
  *              "getComm"={
  *              "method"="GET",
- *              "path"="/commandes",
+ *              "path"="/commande",
  *     },
  * }
  * )
@@ -38,6 +41,7 @@ class Commande
 
     /**
      * @ORM\Column(type="float")
+     * @Groups({"command_write"})
      */
     private $prixTotal;
 
@@ -58,7 +62,6 @@ class Commande
      */
     private $etat;
 
-
     /**
      * @ORM\Column(type="date")
      */
@@ -78,9 +81,6 @@ class Commande
     {
         $this->details = new ArrayCollection();
     }
-
-  
-
 
     public function getId(): ?int
     {
