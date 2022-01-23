@@ -77,8 +77,6 @@ class CommandeController extends AbstractController
                 $em->flush();
                 return $this->json($commande, Response::HTTP_OK);
             }
-     /**
-     * @Route("/api/commande", name="commande", methods={"GET"})
-     */
+  
 }
 

@@ -25,7 +25,7 @@ final class UserDataPersister implements ContextAwareDataPersisterInterface
       if (isset(\json_decode($request->getContent(), true)['profil'])) {
           $this->profil_id = \json_decode($request->getContent(), true)['profil'];
       }else{
-          $this->profil_id = 0;
+          $this->profil_id = 4;
       }
     }
 

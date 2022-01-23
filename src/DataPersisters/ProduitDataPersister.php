@@ -34,11 +34,12 @@ class ProduitDataPersister implements ContextAwareDataPersisterInterface {
 
     public function persist($data, array $context = [])
     {
-        
       $data->setCatalogue($this->catalogue);
+
       $this->manager->persist($data);
       $this->manager->flush();
       return $data;
+      
     }
 
     public function remove($data, array $context = [])

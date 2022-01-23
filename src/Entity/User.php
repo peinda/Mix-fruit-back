@@ -21,13 +21,15 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  *      "post"={"method"="POST", "access_control"="is_granted('IS_AUTHENTICATED_FULLY') === false"}
  * },
  * itemOperations={
- *      "getUserId"={
- *              "method"="GET",
+ *         "get",
+ *          "put"={
+ *              "method"="PUT",
  *              "path"="/users/{id}",
- *     "access_control"="is_granted('ROLE_ADMIN') or object == user"},
- *      "put"={"access_control"="is_granted('ROLE_ADMIN') or object == user"},
- *      "delete"={"access_control"="is_granted('ROLE_ADMIN')"}
- * },
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "security_message"="Vous n'avez pas l'acces"
+ *     },
+ *  "delete"
+ *     },
  * )
  * @UniqueEntity(
  *     fields={"username", "tel"},

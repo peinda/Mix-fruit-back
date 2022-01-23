@@ -38,13 +38,13 @@ class Produit
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:read"})
+     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:read","prduit:write"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="float")
-     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:read"})
+     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:read","prduit:write"})
      */
     private $prix;
 
@@ -69,13 +69,12 @@ class Produit
 
     /**
      * @ORM\OneToMany(targetEntity=Commentaire::class, mappedBy="produit")
-     * @Groups({"prduit:read"})
      */
     private $commentaires;
 
     /**
      * @ORM\OneToMany(targetEntity=Photo::class, mappedBy="produit", cascade={"persist"})
-     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write", "prduit:write", "prduit:read"})
+     * @Groups({"commenteire:read", "catalogue:read", "catalogue:write"})
      */
     private $photos;
 
